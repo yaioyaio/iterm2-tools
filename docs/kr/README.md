@@ -1,6 +1,8 @@
 # iterm2-tools — iTerm2 우클릭 메뉴·클릭 버튼 확장
 
-[English](../en/README.md) | **한국어**
+[English](../../README.md) | **한국어**
+
+문서: 이 사용 설명서 · [영어 사용 설명서 (English manual)](../../README.md) · [문서 작성·관리 규칙](DOCS_GUIDE.md) · [Documentation rules](../en/DOCS_GUIDE.md)
 
 iTerm2 + zsh 에 아래 세 가지를 추가한다. 필요한 것만 골라 설치할 수 있다.
 
@@ -35,7 +37,7 @@ iTerm2 + zsh 에 아래 세 가지를 추가한다. 필요한 것만 골라 설�
 
 ### 다른 Mac 으로 옮기기
 
-1. `iterm2-tools` 폴더를 통째로 복사한다(AirDrop·zip·USB·git 아무것이나).
+1. `iterm2-tools` 폴더를 통째로 받는다: `git clone https://github.com/yaioyaio/iterm2-tools.git ~/iterm2-tools`, 또는 복사(AirDrop·zip·USB).
 2. 받은 Mac 에서 **`zsh install.sh …`** 형태로 실행한다 — 복사 중 실행 권한이 빠져도 동작하고, 설치한 파일의 격리 표시(quarantine)는 자동으로 지운다.
 3. 먼저 `zsh install.sh status` 로 그 Mac 의 조건(macOS·iTerm2 버전·런타임·Rosetta·API)을 확인한다.
 
@@ -60,9 +62,9 @@ iTerm2 + zsh 에 아래 세 가지를 추가한다. 필요한 것만 골라 설�
 | `tests/test_portability.zsh` | 이식성 테스트: 가짜 홈·가짜 iTerm2 설정으로 "다른 Mac" 조건 S1~S7 과 언어(S8: 영어 설치·`--lang` 저장/전환·선택 순서) 재현 | — |
 | `tests/test_lang.zsh` | 언어 공통 검사: 모든 실행 파일의 언어 선택 코드 일치·선택 순서 12가지·영어 화면 한글 0자·번역 함수 밖 한글 없음(정적 검사) | — |
 | (생성) `lang` | `install.sh --lang en\|kr` 로 저장한 화면 언어(`--lang` 을 쓸 때만 생김) | `~/.config/iterm2-tools/lang` |
-| `tests/test_docs.zsh` | 문서 짝 검사: `docs/en` ↔ `docs/kr` 파일 짝·언어 전환 링크·구조(제목 단계·번호, 표 행, 목록, 코드 블록의 명령) 일치 | — |
-| `README.md` | 첫 화면: 언어 선택(English / 한국어) | — |
-| `docs/en/`, `docs/kr/` | 문서 본문(영어 / 한국어, 같은 이름의 파일이 짝). 작성·관리 규칙은 `DOCS_GUIDE.md` | — |
+| `tests/test_docs.zsh` | 문서 짝 검사: `README.md` ↔ `docs/kr/README.md`, `docs/en` ↔ `docs/kr` 파일 짝·언어 전환 링크·구조(제목 단계·번호, 표 행, 목록, 코드 블록의 명령) 일치 | — |
+| `README.md` | 영어 사용 설명서(메인 문서) | — |
+| `docs/kr/README.md`, `docs/{en,kr}/` | 한국어 사용 설명서(`README.md` 의 짝)와 그 밖의 문서(영어 / 한국어, 같은 이름의 파일이 짝). 작성·관리 규칙은 `DOCS_GUIDE.md` | — |
 
 설치 위치의 `~/Library/Application Support/iTerm2/…` 는 기본값이다. 그 Mac 에서 Scripts 폴더(`UseCustomScriptsFolder`)나 DynamicProfiles 폴더(`dynamicProfilesPath`)를 바꿔 두었다면 설치 스크립트가 **바뀐 위치에 설치**한다.
 

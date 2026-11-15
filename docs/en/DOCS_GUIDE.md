@@ -8,9 +8,9 @@ This package keeps English and Korean documentation as **separate files** and ma
 
 | Location | Contents |
 |---|---|
-| `README.md` (package top level) | Landing page. Only language links and a one-line introduction (no body) |
-| `docs/en/<name>.md` | English document |
-| `docs/kr/<name>.md` | Korean document — paired with the file of the **same name** in `docs/en` |
+| `README.md` (package top level) | **Main document** = the English manual. Its pair is `docs/kr/README.md` |
+| `docs/en/<name>.md` | Other English documents (there is no `docs/en/README.md`) |
+| `docs/kr/<name>.md` | Korean document — paired with the file of the **same name** in `docs/en`; `docs/kr/README.md` is the pair of the top-level `README.md` |
 
 - Do not keep a document in only one language. Create every new document in both languages.
 - File names are in English (shared by both languages).
@@ -26,7 +26,7 @@ Put a language-switch line right below the title. Bold the current language and 
 **English** | [한국어](../kr/<name>.md)
 ```
 
-Korean documents use `[English](../en/<name>.md) | **한국어**`.
+Korean documents use `[English](../en/<name>.md) | **한국어**`. The manual pair uses different paths: the top-level `README.md` uses `**English** | [한국어](docs/kr/README.md)`, and `docs/kr/README.md` uses `[English](../../README.md) | **한국어**`.
 
 ## 3. Rules that keep the languages aligned
 
@@ -59,7 +59,7 @@ The two documents are kept as **line-for-line translations**. `tests/test_docs.z
 
 1. Create `docs/en/<name>.md` and `docs/kr/<name>.md` together.
 2. Add the language-switch line from section 2.
-3. Add links in both languages to the document list in the top-level `README.md`.
+3. Add the new document's links to the document-list line at the top of `README.md` and `docs/kr/README.md`.
 4. Check with `zsh tests/test_docs.zsh`.
 
 ## 6. On-screen text in the executables (English/Korean)
