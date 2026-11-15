@@ -1,0 +1,80 @@
+#!/bin/zsh -f
+# iterm2-tools: iterm-open
+# iTerm2 우클릭(Smart Selection "Run Command")에서 호출되는 래퍼.
+#
+#   iterm-open <vscode|finder|reveal> <현재폴더> <매치된 텍스트>
+#
+# - 인자는 iTerm2가 셸 이스케이프해서 넘긴다. 여기서는 따옴표로만 다루고
+#   eval / sh -c 하지 않는다. 실행 대상은 VS Code CLI / open 으로 고정.
+# - zsh 의 `path` 는 PATH 와 묶인 특수 변수라서 파일 경로 변수는 fp 를 쓴다.
+# - 점검용: IO_DRYRUN=1 이면 실행하지 않고 실행할 명령만 출력한다.
+
+emulate -L zsh
+setopt no_unset pipe_fail
+
+target=${1:-} dir=${2:-$HOME} raw=${3:-}
+
+# ── 언어 선택 (iterm2-tools 공통 — 모든 실행 파일에 같은 코드. tests/test_lang.zsh 가 일치를 확인) ──
+#   IT2_LANG(en|kr) → ~/.config/iterm2-tools/lang (install.sh --lang 이 저장) → macOS 언어 → en
+#   IT2_TEST_SYS_LANG: 테스트용 macOS 언어 흉내(설정돼 있으면 defaults 대신 사용, 빈 값 = 언어 정보 없음)
+it2_lang() {
+  local v=${IT2_LANG:-} f=$HOME/.config/iterm2-tools/lang
+  [[ -z $v && -r $f ]] && v=$(<$f)
+  [[ -z $v ]] && v=${IT2_TEST_SYS_LANG-$(/usr/bin/defaults read -g AppleLanguages 2>/dev/null | /usr/bin/sed -n '2{s/[^A-Za-z_-]//g;p;}')}
+  case ${v:l} in (kr|ko|ko[-_]*) REPLY=kr ;; (*) REPLY=en ;; esac
+}
+it2_lang; IT2_L=$REPLY
+t() { if [[ $IT2_L == kr ]]; then print -r -- "$1"; else print -r -- "$2"; fi }   # t '한국어' 'English'
+
+run() { if [[ -n ${IO_DRYRUN:-} ]]; then print -r -- "DRY: ${(q-)@}"; else "$@"; fi }
+
+notify() {
+  [[ -n ${IO_DRYRUN:-} ]] && return
+  /usr/bin/osascript -e "display notification \"$1\" with title \"iterm-open\"" 2>/dev/null
+}
+
+# VS Code CLI 찾기: 일반 설치 위치 → 사용자 Applications → Spotlight
+find_code_cli() {
+  [[ -n ${IO_NO_CODE_CLI:-} ]] && return 1        # 테스트용: VS Code CLI 가 없는 Mac 흉내
+  local app
+  for app in "/Applications/Visual Studio Code.app" "$HOME/Applications/Visual Studio Code.app" \
+             ${(f)"$(/usr/bin/mdfind 'kMDItemCFBundleIdentifier == "com.microsoft.VSCode"' 2>/dev/null)"}; do
+    [[ -x "$app/Contents/Resources/app/bin/code" ]] && { print -r -- "$app/Contents/Resources/app/bin/code"; return 0 }
+  done
+  return 1
+}
+
+# 점검용: 이 Mac 에서 쓸 VS Code CLI 경로 출력(없으면 rc=1) — 테스트가 기대값을 정할 때 사용
+[[ $target == which-code ]] && { find_code_cli; exit $? }
+
+# 매치 텍스트 → 절대경로(fp), 줄(line), 열(col)
+fp=$raw line="" col=""
+fp=${fp#file://}
+fp=${fp%%[,;)\]\'\"]}                              # 끝에 붙은 구두점 제거
+# "파일:줄" / "파일:줄:열" — 같은 이름의 실제 파일이 있으면 파일을 우선한다
+if [[ ! -e $fp && $fp =~ '^(.*[^0-9:]):([0-9]+)(:([0-9]+))?$' ]]; then
+  fp=$match[1] line=$match[2] col=${match[4]:-}
+fi
+[[ $fp == '~'* ]] && fp=$HOME${fp#\~}
+[[ $fp != /* ]] && fp=$dir/$fp
+fp=${fp:a}
+
+if [[ ! -e $fp ]]; then
+  print -u2 -r -- "iterm-open: $(t '경로 없음' 'path not found'): $fp"
+  notify "$(t '경로를 찾지 못했습니다' 'Path not found')"
+  exit 1
+fi
+
+case $target in
+  vscode)
+    if cli=$(find_code_cli); then
+      if [[ -n $line ]]; then run "$cli" -g -- "$fp:$line${col:+:$col}"
+      else                    run "$cli" -- "$fp"; fi
+    else
+      # CLI 를 못 찾으면 앱으로만 연다(줄 이동은 불가)
+      run /usr/bin/open -b com.microsoft.VSCode -- "$fp" || notify "$(t 'VS Code 를 찾지 못했습니다' 'VS Code not found')"
+    fi ;;
+  finder) if [[ -d $fp ]]; then run /usr/bin/open -- "$fp"; else run /usr/bin/open -R -- "$fp"; fi ;;
+  reveal) run /usr/bin/open -R -- "$fp" ;;
+  *) print -u2 "usage: iterm-open <vscode|finder|reveal> <dir> <text>"; exit 2 ;;
+esac

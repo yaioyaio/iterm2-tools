@@ -1,0 +1,40 @@
+# iterm2-tools — git upload blocklist
+# Only the package sources, tests and docs (docs/en, docs/kr) are tracked.
+
+# macOS / Windows leftovers
+.DS_Store
+._*
+Thumbs.db
+
+# Python bytecode (created when tests/test_open_in_tools.py runs)
+__pycache__/
+*.py[cod]
+
+# Editor and IDE local files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs and temporary files
+*.log
+*.tmp
+tmp/
+
+# Local per-user setting written by `install.sh --lang` (lives in ~/.config, never in the repo)
+lang
+
+# Secrets — this package needs none; block them so they can never be committed by mistake
+.env
+.env.*
+*.env
+*.env.*
+!*.example
+*.pem
+*.key
+*.p12
+*.jks
+*secret*
+*credential*
+*token*
